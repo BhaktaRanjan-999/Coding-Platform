@@ -1,71 +1,67 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "./api/axios"; // Ensure axios instance is configured
+import "./ProblemsPage.css";
 
-function ProblemsPage({ problems }) {
+function ProblemsPage() {
   const navigate = useNavigate();
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("/assignments/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setProblems(res.data); // assuming backend returns array
+      } catch (err) {
+        console.error("❌ Failed to load assignments:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssignments();
+  }, []);
+
+  const handleSolveClick = (problemId) => {
+    navigate(`/solve/${problemId}`, { state: { examMode: true } });
+  };
+
+  if (loading) return <p>Loading problems...</p>;
 
   return (
-    <div className="dashboard-card">
-      <h2 style={{ marginBottom: 18 }}>Problems List</h2>
-      <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff" }}>
-        <thead>
-          <tr style={{ background: "#efeaea", textAlign: "left" }}>
-            <th style={{ padding: 10 }}>Title</th>
-            <th style={{ padding: 10 }}>Difficulty</th>
-            <th style={{ padding: 10 }}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {problems.map((problem) => (
-            <tr key={problem.id} style={{ borderBottom: "1px solid #f4f4f4" }}>
-              <td style={{ padding: 10 }}>{problem.title}</td>
-              <td style={{ padding: 10 }}>
-                <span
-                  style={{
-                    padding: "6px 18px",
-                    borderRadius: 20,
-                    background:
-                      problem.difficulty === "Easy"
-                        ? "#6ee7b7"
-                        : problem.difficulty === "Medium"
-                        ? "#fde68a"
-                        : "#fca5a5",
-                    color:
-                      problem.difficulty === "Easy"
-                        ? "#065f46"
-                        : problem.difficulty === "Medium"
-                        ? "#92400e"
-                        : "#b91c1c",
-                    fontWeight: 600
-                  }}
-                >
-                  {problem.difficulty}
-                </span>
-              </td>
-              <td style={{ padding: 10 }}>
+    <div className="problems-container-background">
+      <div className="problems-card-wrapper">
+        <h2 className="problems-list-header">Problems List</h2>
+        {problems.length === 0 ? (
+          <p className="no-problems-text">No problems available at the moment.</p>
+        ) : (
+          <div className="problems-grid">
+            {problems.map((problem) => (
+              <div className="problem-item-card" key={problem._id}>
+                <div className="problem-details">
+                  <h3 className="problem-title">{problem.title}</h3>
+                  <p className="problem-desc">{problem.description}</p>
+                  {problem.difficulty && (
+                    <span className={`difficulty-tag ${problem.difficulty.toLowerCase()}`}>
+                      {problem.difficulty}
+                    </span>
+                  )}
+                </div>
                 <button
-                  style={{
-                    background: "#725cad",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 16,
-                    fontWeight: 600,
-                    padding: "8px 26px",
-                    cursor: "pointer",
-                    fontSize: 15
-                  }}
-                  onClick={() => navigate(`/solve/${problem.id}`)}
+                  className="solve-action-button"
+                  onClick={() => handleSolveClick(problem._id)}
                 >
                   Solve
                 </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {problems.length === 0 && (
-        <div style={{ marginTop: 22 }}>No problems available.</div>
-      )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
