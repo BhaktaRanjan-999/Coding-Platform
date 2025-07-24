@@ -12,7 +12,11 @@ console.log('MongoDB URI:', process.env.MONGO_URI ? '✅ Found' : '❌ Not found
 const app = express();
 
 // ✅ Middleware (order matters!)
-app.use(cors());
+app.use(cors({
+  origin: ["project-test-iare.vercel.app"],
+  methods: ['POST', 'GET'],
+  credentials: true
+}));
 // ✅ JSON middleware before routes
 
 // ✅ Routes
