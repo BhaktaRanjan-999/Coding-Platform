@@ -38,6 +38,7 @@ app.get("/", (req, res) => {
   res.send("🎉 CONTEXTY Backend is Running!");
 });
 
+mongoose.connect('https://cloud.mongodb.com/v2/6869051c8085b878133af474#/metrics/replicaSet/68690822f20e6228f86d746a/explorer/test/users/find ');
 // ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
