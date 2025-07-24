@@ -7,15 +7,17 @@ function LoginPage({ onLoginSuccess }) {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student"); // default role
   const [error, setError] = useState("");
-
+  axios.defaults.withCredentials = true;
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    axios.post('https://project-iare-backend.vercel.app/',{email, password, role})
     setError("");
 
     try {
       const data = await loginUser(email, password, role); // send role to backend
       localStorage.setItem("token", data.token);
-      alert("Login Successful!");
       onLoginSuccess(data.user);
     } catch (err) {
       setError("Login failed");
